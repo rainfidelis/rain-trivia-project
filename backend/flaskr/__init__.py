@@ -54,6 +54,27 @@ def create_app(test_config=None):
     ten questions per page and pagination at the bottom of the screen for three pages.
     Clicking on the page numbers should update the questions.
     """
+    @app.route("/questions")
+    def get_questions():
+        
+        current_category = request.args.get("currentCategory")
+        categories = Category.query.all()
+        all_categories = [category.format() for category in categories]
+
+        all_questions = Question.query.order_by(Question.id).all()
+        paginated_questions = paginator(request, all_questions)
+
+        if len(paginated_questions) == 0:
+            abort(404)
+
+        return {
+            "success": True,
+            "questions": paginated_questions,
+            "total_questions": len(all_questions),
+            "current_category": current_category,
+            "categories": all_categories
+        }
+
 
     """
     @TODO:
@@ -111,6 +132,13 @@ def create_app(test_config=None):
     Create error handlers for all expected errors
     including 404 and 422.
     """
+    @app.errorhandler(404)
+    def page_not_found(error):
+        return {
+            "error": 404,
+            "success": False,
+            "message": "resource not found"
+        }
 
     return app
 

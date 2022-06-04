@@ -1,8 +1,8 @@
 .vscode
 __pycache__
 venv
-**/Pipfile**
-.env
+backend/Pipfile**
+backend/.env
 
 # OS generated files #
 ######################
