@@ -32,7 +32,7 @@ class TriviaTestCase(unittest.TestCase):
 
     def test_get_all_questions(self):
         res = self.client().get('/questions',
-                                json={"currentCategory": "Test"})
+                                json={"currentCategory": 3})
         data = json.loads(res.data)
 
         self.assertEqual(res.status_code, 200)
@@ -43,10 +43,10 @@ class TriviaTestCase(unittest.TestCase):
 
     def test_get_questions_page_out_of_range(self):
         res = self.client().get('/questions?page=10000',
-                                json={"currentCategory": "Test"})
+                                json={"currentCategory": 3})
         data = json.loads(res.data)
 
-        self.assertEqual(data['error'], 404)
+        self.assertEqual(res.status_code, 404)
         self.assertEqual(data['message'], 'resource not found')
         self.assertFalse(data['success'])
 
@@ -70,20 +70,32 @@ class TriviaTestCase(unittest.TestCase):
         self.assertTrue(data['success'])
         self.assertTrue(data['id'])
 
+    def test_create_question_missing_data(self):
+        res = self.client().post('/questions', json={
+            "question": "",
+            "answer": "Joe Biden",
+            "category": 4,
+            "difficulty": 1
+        })
+        data = json.loads(res.data)
+
+        self.assertEqual(res.status_code, 400)
+        self.assertFalse(data['success'])
+        self.assertEqual(data['message'], 'bad request')
 
     def test_delete_question(self):
-        res = self.client().delete('/questions/28')
+        res = self.client().delete('/questions/32')
         data = json.loads(res.data)
 
         self.assertEqual(res.status_code, 200)
-        self.assertEqual(data['deleted'], 28)
+        self.assertEqual(data['deleted'], 32)
         self.assertTrue(data['success'])
 
     def test_delete_question_no_data(self):
         res = self.client().delete('/questions/500')
         data = json.loads(res.data)
 
-        self.assertEqual(data['error'], 404)
+        self.assertEqual(res.status_code, 404)
         self.assertEqual(data['message'], 'resource not found')
         self.assertFalse(data['success'])
 

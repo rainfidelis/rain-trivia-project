@@ -47,7 +47,8 @@ def create_app(test_config=None):
     @app.route("/questions")
     def get_questions():
         
-        current_category = request.get_json()["currentCategory"]
+        category_id = request.get_json()["currentCategory"]
+        current_category = Category.query.get(category_id).format()
         categories = Category.query.all()
         all_categories = [category.format() for category in categories]
 
@@ -84,22 +85,25 @@ def create_app(test_config=None):
     def create_question():
         data = request.get_json()
 
-        question = data['question']
-        answer = data['answer']
-        category = data['category']
-        difficulty = data['difficulty']
+        question = data.get('question', None)
+        answer = data.get('answer', None)
+        category = data.get('category', None)
+        difficulty = data.get('difficulty', None)
 
-        new_question = Question(question=question,
-                                answer=answer,
-                                category=category,
-                                difficulty=difficulty)
+        if question and answer and category and difficulty:
+            new_question = Question(question=question,
+                                    answer=answer,
+                                    category=category,
+                                    difficulty=difficulty)
 
-        new_question.insert()
+            new_question.insert()
 
-        return {
-            "success": True,
-            "id": new_question.id
-        }
+            return {
+                "success": True,
+                "id": new_question.id
+            }
+        else:
+            abort(400)
 
     """
     @TODO:
@@ -140,11 +144,19 @@ def create_app(test_config=None):
     """
     @app.errorhandler(404)
     def page_not_found(error):
-        return {
+        return (jsonify({
             "error": 404,
             "success": False,
             "message": "resource not found"
-        }
+        }), 404)
+
+    @app.errorhandler(400)
+    def bad_request(error):
+        return (jsonify({
+            "success": False, 
+            "error": 400, 
+            "message": "bad request"
+        }), 400)
 
     return app
 
