@@ -58,12 +58,25 @@ class TriviaTestCase(unittest.TestCase):
         self.assertTrue(data['success'])
         self.assertTrue(data['categories'])
 
+    def test_create_question(self):
+        res = self.client().post('/questions', json={
+            "question": "Who is the president of America",
+            "answer": "Joe Biden",
+            "category": 4,
+            "difficulty": 1
+            })
+        data = json.loads(res.data)
+
+        self.assertTrue(data['success'])
+        self.assertTrue(data['id'])
+
+
     def test_delete_question(self):
-        res = self.client().delete('/questions/5')
+        res = self.client().delete('/questions/28')
         data = json.loads(res.data)
 
         self.assertEqual(res.status_code, 200)
-        self.assertEqual(data['deleted_id'], 5)
+        self.assertEqual(data['deleted'], 28)
         self.assertTrue(data['success'])
 
     def test_delete_question_no_data(self):
