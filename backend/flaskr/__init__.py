@@ -46,9 +46,11 @@ def create_app(test_config=None):
 
     @app.route("/questions")
     def get_questions():
-        
-        category_id = request.get_json()["currentCategory"]
-        current_category = Category.query.get(category_id).format()
+
+        # retrieve category id from json data
+        cat_id = request.get_json()["currentCategory"]
+        # current_category = Category.query.get(cat_id).format()
+
         categories = Category.query.all()
         all_categories = [category.format() for category in categories]
 
@@ -62,7 +64,7 @@ def create_app(test_config=None):
             "success": True,
             "questions": paginated_questions,
             "total_questions": len(all_questions),
-            "current_category": current_category,
+            "current_category": cat_id,
             "categories": all_categories
         }
 
@@ -71,6 +73,7 @@ def create_app(test_config=None):
         
         question = Question.query.get(id)
 
+        # if question id doensn't exist, abort operation
         if question is None:
             abort(404)
 
@@ -85,11 +88,13 @@ def create_app(test_config=None):
     def create_question():
         data = request.get_json()
 
+        # Collect question data. Pass none if value is left empty
         question = data.get('question', None)
         answer = data.get('answer', None)
         category = data.get('category', None)
         difficulty = data.get('difficulty', None)
 
+        # Ensure no value is empty before proceeding to create new question
         if question and answer and category and difficulty:
             new_question = Question(question=question,
                                     answer=answer,
@@ -102,7 +107,9 @@ def create_app(test_config=None):
                 "success": True,
                 "id": new_question.id
             }
+        
         else:
+            # Abort operation if any value is none
             abort(400)
 
     """
@@ -116,14 +123,27 @@ def create_app(test_config=None):
     Try using the word "title" to start.
     """
 
-    """
-    @TODO:
-    Create a GET endpoint to get questions based on category.
+    @app.route('/categories/<int:cat_id>/questions')
+    def get_question_by_cat(cat_id):
 
-    TEST: In the "List" tab / main screen, clicking on one of the
-    categories in the left column will cause only questions of that
-    category to be shown.
-    """
+        # confirm category exists by attempting to retrieve it
+        category = Category.query.get(cat_id)
+
+        # abort operation if category doesn't exist
+        if category is None:
+            abort(404)
+
+        # if category exists, proceed to filter questions by category
+        cat_questions = Question.query.filter(
+                            Question.category == cat_id).order_by(Question.id).all()
+        paginated_questions = paginator(request, cat_questions)
+
+        return {
+            "success": True,
+            "questions": paginated_questions,
+            "total_questions": len(cat_questions),
+            "current_category": cat_id
+        }
 
     """
     @TODO:
