@@ -14,8 +14,7 @@ class TriviaTestCase(unittest.TestCase):
         """Define test variables and initialize app."""
         self.app = create_app()
         self.client = self.app.test_client
-        # self.database_name = "trivia_test"
-        self.database_path = config('DATABASE_URL')
+        self.database_path = config('DATABASE_TEST_URL')
         setup_db(self.app, self.database_path)
 
         # binds the app to the current context
@@ -130,6 +129,34 @@ class TriviaTestCase(unittest.TestCase):
         self.assertEqual(res.status_code, 400)
         self.assertFalse(data['success'])
         self.assertEqual(data['message'], 'bad request')
+
+    def test_play_quiz(self):
+        res = self.client().post('/quizzes', json={
+            "quiz_category": {
+                "type": "Geography", 
+                "id": "3"
+            },
+            "previous_questions": [13, 14]
+        })
+        data = json.loads(res.data)
+
+        self.assertEqual(res.status_code, 200)
+        self.assertTrue(data['success'])
+        self.assertTrue(data['question'])
+
+    def test_play_quiz_empty_question_list(self):
+        res = self.client().post('/quizzes', json={
+            "quiz_category": {
+                "type": "Geography", 
+                "id": "3"
+            },
+            "previous_questions": [13, 14, 15]
+        })
+        data = json.loads(res.data)
+
+        self.assertEqual(res.status_code, 200)
+        self.assertTrue(data['success'])
+        self.assertFalse(data['question'])
 
 
 # Make the tests conveniently executable
