@@ -30,8 +30,7 @@ class TriviaTestCase(unittest.TestCase):
         pass
 
     def test_get_all_questions(self):
-        res = self.client().get('/questions',
-                                json={"currentCategory": 3})
+        res = self.client().get('/questions')
         data = json.loads(res.data)
 
         self.assertEqual(res.status_code, 200)
@@ -41,8 +40,7 @@ class TriviaTestCase(unittest.TestCase):
         self.assertTrue(data['categories'])
 
     def test_get_questions_page_out_of_range(self):
-        res = self.client().get('/questions?page=10000',
-                                json={"currentCategory": 3})
+        res = self.client().get('/questions?page=10000')
         data = json.loads(res.data)
 
         self.assertEqual(res.status_code, 404)
@@ -115,7 +113,7 @@ class TriviaTestCase(unittest.TestCase):
         self.assertEqual(data['message'], 'resource not found')
 
     def test_search_questions(self):
-        res = self.client().post('/questions/search', {
+        res = self.client().post('/questions/search', json={
             'searchTerm': 'what'
         })
         data = json.loads(res.data)
@@ -130,7 +128,7 @@ class TriviaTestCase(unittest.TestCase):
         data = json.loads(res.data)
 
         self.assertEqual(res.status_code, 400)
-        self.assertTrue(data['false'])
+        self.assertFalse(data['success'])
         self.assertEqual(data['message'], 'bad request')
 
 

@@ -38,7 +38,7 @@ def create_app(test_config=None):
     @app.route("/categories")
     def get_categories():
         all_categories = Category.query.order_by(Category.id).all()
-        categories = [category.format() for category in all_categories]
+        categories = {category.id:category.type for category in all_categories}
         return {
             "success": True,
             "categories": categories
@@ -47,12 +47,8 @@ def create_app(test_config=None):
     @app.route("/questions")
     def get_questions():
 
-        # retrieve category id from json data
-        cat_id = request.get_json()["currentCategory"]
-        # current_category = Category.query.get(cat_id).format()
-
         categories = Category.query.all()
-        all_categories = [category.format() for category in categories]
+        all_categories = {category.id:category.type for category in categories}
 
         all_questions = Question.query.order_by(Question.id).all()
         paginated_questions = paginator(request, all_questions)
@@ -64,7 +60,7 @@ def create_app(test_config=None):
             "success": True,
             "questions": paginated_questions,
             "total_questions": len(all_questions),
-            "current_category": cat_id,
+            "current_category": None,
             "categories": all_categories
         }
 
@@ -112,20 +108,9 @@ def create_app(test_config=None):
             # Abort operation if any value is none
             abort(400)
 
-    """
-    @TODO:
-    Create a POST endpoint to get questions based on a search term.
-    It should return any questions for whom the search term
-    is a substring of the question.
-
-    TEST: Search by any phrase. The questions list will update to include
-    only question that include that string within their question.
-    Try using the word "title" to start.
-    """
     @app.route('/questions/search', methods=['POST'])
     def search_questions():
         search = request.get_json().get('searchTerm', None)
-        current_category = request.get_json().get('currentCategory')
 
         if search:
             questions = Question.query.filter(Question.question.ilike(f'%{search}%')).all()
@@ -135,7 +120,7 @@ def create_app(test_config=None):
                 "success": True,
                 "questions": all_questions,
                 "total_questions": len(questions),
-                "current_category": current_category
+                "current_category": None
             }
         else:
             abort(400)
@@ -159,7 +144,7 @@ def create_app(test_config=None):
             "success": True,
             "questions": paginated_questions,
             "total_questions": len(cat_questions),
-            "current_category": cat_id
+            "current_category": category.type
         }
 
     """
@@ -173,6 +158,7 @@ def create_app(test_config=None):
     one question at a time is displayed, the user is allowed to answer
     and shown whether they were correct or not.
     """
+    
 
     """
     @TODO:
