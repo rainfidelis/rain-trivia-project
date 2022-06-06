@@ -1,4 +1,3 @@
-import os
 import unittest
 import json
 from flask_sqlalchemy import SQLAlchemy
@@ -114,6 +113,25 @@ class TriviaTestCase(unittest.TestCase):
         self.assertEqual(res.status_code, 404)
         self.assertFalse(data['success'])
         self.assertEqual(data['message'], 'resource not found')
+
+    def test_search_questions(self):
+        res = self.client().post('/questions/search', {
+            'searchTerm': 'what'
+        })
+        data = json.loads(res.data)
+
+        self.assertEqual(res.status_code, 200)
+        self.assertTrue(data['success'])
+        self.assertTrue(data['questions'])
+        self.assertTrue(data['total_questions'])
+
+    def test_search_questions_no_data(self):
+        res = self.client().post('/questions/search')
+        data = json.loads(res.data)
+
+        self.assertEqual(res.status_code, 400)
+        self.assertTrue(data['false'])
+        self.assertEqual(data['message'], 'bad request')
 
 
 # Make the tests conveniently executable
