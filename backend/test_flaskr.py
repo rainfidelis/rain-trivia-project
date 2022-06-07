@@ -23,7 +23,7 @@ class TriviaTestCase(unittest.TestCase):
             self.db.init_app(self.app)
             # create all tables
             self.db.create_all()
-    
+
     def tearDown(self):
         """Executed after reach test"""
         pass
@@ -133,7 +133,7 @@ class TriviaTestCase(unittest.TestCase):
     def test_play_quiz(self):
         res = self.client().post('/quizzes', json={
             "quiz_category": {
-                "type": "Geography", 
+                "type": "Geography",
                 "id": "3"
             },
             "previous_questions": [13, 14]
@@ -147,7 +147,7 @@ class TriviaTestCase(unittest.TestCase):
     def test_play_quiz_empty_question_list(self):
         res = self.client().post('/quizzes', json={
             "quiz_category": {
-                "type": "Geography", 
+                "type": "Geography",
                 "id": "3"
             },
             "previous_questions": [13, 14, 15]
